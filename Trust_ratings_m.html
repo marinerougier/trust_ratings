@@ -54,6 +54,31 @@ DESCRIPTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   var preloadimages = [];
   var prolificID = jsPsych.data.getURLVariable("prolificID"); // Need to add ?prolificID={{%PROLIFIC_PID%}} at the end of the prolific survey link!
 
+
+// safari & ie exclusion ----------------------------------------------------------------
+var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+var is_ie = /*@cc_on!@*/false || !!document.documentMode;
+
+var is_compatible = !(is_safari || is_ie);
+
+
+if(!is_compatible) {
+
+    var safari_exclusion = {
+        type: "html-keyboard-response",
+        stimulus:
+        "<p>Sorry, this study is not compatible with your browser.</p>" +
+        "<p>Please try again with a compatible browser (e.g., Chrome or Firefox).</p>",
+        choices: jsPsych.NO_KEYS
+    };
+
+    var timeline_safari = [];
+
+    timeline_safari.push(safari_exclusion);
+    jsPsych.init({timeline: timeline_safari});
+
+}
+
   // EXPERIMENT --------------------------------------------------------------------------------------------------------
 
   // initial instructions -----------------------------------------------------------------
@@ -84,7 +109,6 @@ DESCRIPTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     button_label: 'Switch to fullscreen',
     fullscreen_mode: true
   }
-
 
   // Initial instructions -----------------------------------------------------------------
   // First slide --------------------------------------------------------------------------
