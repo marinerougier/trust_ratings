@@ -221,6 +221,8 @@ if(!is_compatible) {
   timeline = _.flattenDeep(timeline); // do not remove this!
 
   // INITIALISE EXP ----------------------------------------------------------------------------------------------------
+  
+if(is_compatible) {
   jsPsych.init({
     timeline: timeline,
     preload_images: preloadimages,
@@ -261,6 +263,7 @@ if(!is_compatible) {
       });
     }
   });
+  }
 </script>
 
 </html>
