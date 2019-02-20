@@ -92,7 +92,7 @@ if(!is_compatible) {
   var timeline = [];
   var preloadimages = [];
   var prolificID = jsPsych.data.getURLVariable("prolificID"); // Need to add ?prolificID={{%PROLIFIC_PID%}} at the end of the prolific survey link!
-
+  if(prolificID == null) {prolificID = "999";}
 
   // EXPERIMENT --------------------------------------------------------------------------------------------------------
 
@@ -130,7 +130,9 @@ if(!is_compatible) {
   var instructions_gene = {
     type: "html-keyboard-response",
     stimulus:
-      "<p>You are now about to start the study. In this study, you will engage in three different tasks.</p>" +
+      "<p>You are now about to start the study. In this study, you will engage in <b>3 different tasks</b>.</p>  " +
+      "<p>The first task consists in <b>rating several faces </b>and the two following tasks are about <b>first names categorization.</b></p> " +
+      "<p>After these 3 tasks, we will ask you to fill a <b>short survey.</b></p> " +
       "<p class = 'continue-instructions'>Press <span class='light-keys'><kbd>space</kbd></span> to start Task 1.</p>",
     choices: [32]
   };
@@ -147,7 +149,7 @@ if(!is_compatible) {
       html += "<p class='justify'>In this part, your task is to rate <b>60 persons' face on trustworthiness</b>. ";
       html += "Specifically, you have to indicate to what extent each person seems trustworthy from 1 (Not-at-all trustworthy) ";
       html += "to 9 (Extremely trustworthy). </br></br>";
-      html += "On each trial, a face will be displayed during 1 second and then you will have to rate the face. </br></br>";
+      html += "Be careful: on each trial, a face will be displayed during only 1 second. After that, you will have to rate the face. </br></br>";
       html += "Note that it is <b>extremely important that you answer as honestly and as spontaneously as possible. </b> ";
       html += "The first answer that comes to mind is usually the best answer. ";
       html += "<p></br>Press <span class='light-keys'><kbd>space</kbd></span> to continue</p>";
@@ -203,7 +205,7 @@ if(!is_compatible) {
       { face: 'faces/CFD-AF-238-185-N.jpg' },
       { face: 'faces/CFD-AF-256-160-N.jpg' },
       { face: 'faces/CFD-AM-201-076-N.jpg' },
-      { face: 'faces/CCFD-AM-202-079-N.jpg' },
+      { face: 'faces/CFD-AM-202-079-N.jpg' },
       { face: 'faces/CFD-AM-213-056-N.jpg' },
       { face: 'faces/CFD-AM-217-085-N.jpg' },
       { face: 'faces/CFD-AM-230-150-N.jpg' },
@@ -215,7 +217,7 @@ if(!is_compatible) {
       { face: 'faces/CFD-BF-029-031-N.jpg' },
       { face: 'faces/CFD-BF-034-002-N.jpg' },
       { face: 'faces/CFD-BF-035-001-N.jpg' },
-      { face: 'faces/CCFD-BF-220-161-N.jpg' },
+      { face: 'faces/CFD-BF-220-161-N.jpg' },
       { face: 'faces/CFD-BF-246-170-N.jpg' },
       { face: 'faces/CFD-BM-001-014-N.jpg' },
       { face: 'faces/CFD-BM-025-035-N.jpg' },
@@ -256,7 +258,7 @@ if(!is_compatible) {
       { face: 'faces/CFD-WM-223-056-N.jpg' },
       { face: 'faces/CFD-WM-227-099-N.jpg' },
       { face: 'faces/CFD-WM-238-020-N.jpg' },
-      { face: 'faces/CCFD-WM-241-072-N.jpg' }
+      { face: 'faces/CFD-WM-241-072-N.jpg' }
     ],
     randomize_order: true
   }
@@ -298,12 +300,12 @@ if(is_compatible) {
 
       firebase.initializeApp(config);
       var database = firebase.database();
-      var id = jsPsych.randomization.randomID(15); // short ID
+      var jspsych_id = jsPsych.randomization.randomID(15); // short ID
 
       /* jsPsych: add data to every trial */
       jsPsych.data.addProperties({
         prolificID: prolificID,
-        id: id,
+        jspsych_id: jspsych_id,
         //traitsOrder: traitsOrder,
         totalTime: jsPsych.totalTime()
       });
@@ -312,10 +314,10 @@ if(is_compatible) {
       //jsPsych.data.displayData();
 
       /* Send data to Firebase and redirect to Qualtrics */
-      database.ref("Trust_Ratings/" + id + "/").update({ subdata }).then(function () {
+      database.ref("Trust_Ratings/" + jspsych_id + "/").update({ subdata }).then(function () {
         console.log("data sent!");
         // $("#jspsych-content").html(debrief);
-        window.location = "https://marinerougier.github.io/VAAST_IAT_Trust_Firebase/index.html?id=" + id;
+        window.location = "https://marinerougier.github.io/VAAST_IAT_Trust_Firebase/index.html?jspsych_id=" + jspsych_id + "?prolificID=" + prolificID;
       });
     }
   });
