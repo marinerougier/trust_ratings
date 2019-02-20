@@ -256,7 +256,7 @@ if(is_compatible) {
       //jsPsych.data.displayData();
 
       /* Send data to Firebase and redirect to Qualtrics */
-      database.ref("judgeMarine3/" + id + "/").update({ subdata }).then(function () {
+      database.ref("Trust_Ratings/" + id + "/").update({ subdata }).then(function () {
         console.log("data sent!");
         // $("#jspsych-content").html(debrief);
         window.location = "https://marinerougier.github.io/VAAST_IAT_Trust_2bis/index.html?id=" + id;
