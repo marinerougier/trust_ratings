@@ -1,0 +1,395 @@
+<!-- 
+DESCRIPTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>exp</title>
+  <script src="jspsych-6.0.3/jspsych.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-iat-html.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-vaast-text.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-vaast-fixation.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-call-function.js"></script>
+  <script src="jspsych-6.0.3/plugins/keenio-credentials.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-keen-ping.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-fullscreen.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-image-keyboard-response.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-html-button-response.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-survey-text.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-survey-likert.js"></script>
+  <script src="jspsych-6.0.3/plugins/jspsych-survey-multi-choice.js"></script>
+  <script src="js/jspsych-html-slider-response_required.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <script src="js/lodash.min.js"></script>
+  <script src="js/firebase.js"></script>
+  <link href="jspsych-6.0.3/css/jspsych.css" rel="stylesheet" type="text/css">
+  <style>
+    body {
+      cursor: default;
+    }
+
+    #jspsych-html-slider-response-next {
+      margin: 0px;
+    }
+
+    .imgJudge {
+      width: 300px;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    .jspsych-content-wrapper {
+      width: 800px;
+      height: 600px;
+    }
+  </style>
+</head>
+
+<body></body>
+<script>
+
+// dirty hack to lock scrolling ---------------------------------------------------------
+// note that jquery needs to be loaded.
+$('body').css({'overflow':'hidden'});
+  $(document).bind('scroll',function () { 
+       window.scrollTo(0,0); 
+  });
+
+// safari & ie exclusion ----------------------------------------------------------------
+var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+var is_ie = /*@cc_on!@*/false || !!document.documentMode;
+
+var is_compatible = !(is_safari || is_ie);
+
+
+if(!is_compatible) {
+
+    var safari_exclusion = {
+        type: "html-keyboard-response",
+        stimulus:
+        "<p>Sorry, this study is not compatible with your browser.</p>" +
+        "<p>Please try again with a compatible browser (e.g., Chrome or Firefox).</p>",
+        choices: jsPsych.NO_KEYS
+    };
+
+    var timeline_safari = [];
+
+    timeline_safari.push(safari_exclusion);
+    jsPsych.init({timeline: timeline_safari});
+
+}
+
+  /* Parameters */
+  var n = 10; // number of CIs randomly sampled for each cell
+  var githubCIs = 'https://raw.githubusercontent.com/marinerougier/cis_gene_Expe3/master/'; // github CIs path
+
+  /* Initial variables */
+  var timeline = [];
+  var preloadimages = [];
+  var prolificID = jsPsych.data.getURLVariable("prolificID"); // Need to add ?prolificID={{%PROLIFIC_PID%}} at the end of the prolific survey link!
+  if(prolificID == null) {prolificID = "999";}
+
+
+// Preload faces
+  var faces = [
+      "faces/CFD-AM-203-086-N.jpg",
+      "faces/CFD-AM-209-048-N.jpg",
+      "faces/CFD-AM-211-052-N.jpg",
+      "faces/CFD-AM-226-234-N.jpg",
+      "faces/CFD-AM-235-241-N.jpg",
+      "faces/CFD-AM-236-090-N.jpg",
+      "faces/CFD-AM-239-147-N.jpg",
+      "faces/CFD-AM-241-287-N.jpg",
+      "faces/CFD-AM-245-111-N.jpg",
+      "faces/CFD-AM-252-114-N.jpg",
+      "faces/CFD-BM-013-002-N.jpg",
+      "faces/CFD-BM-016-036-N.jpg",
+      "faces/CFD-BM-021-021-N.jpg",
+      "faces/CFD-BM-029-024-N.jpg",
+      "faces/CFD-BM-032-024-N.jpg",
+      "faces/CFD-BM-033-003-N.jpg",
+      "faces/CFD-BM-036-003-N.jpg",
+      "faces/CFD-BM-037-033-N.jpg",
+      "faces/CFD-BM-039-029-N.jpg",
+      "faces/CFD-BM-040-002-N.jpg",
+      "faces/CFD-BM-045-004-N.jpg",
+      "faces/CFD-BM-204-003-N.jpg",
+      "faces/CFD-BM-205-001-N.jpg",
+      "faces/CFD-BM-210-148-N.jpg",
+      "faces/CFD-BM-214-075-N.jpg",
+      "faces/CFD-BM-218-132-N.jpg",
+      "faces/CFD-BM-239-136-N.jpg",
+      "faces/CFD-BM-240-207-N.jpg",
+      "faces/CFD-BM-241-235-N.jpg",
+      "faces/CFD-BM-243-218-N.jpg",
+      "faces/CFD-LM-207-004-N.jpg",
+      "faces/CFD-LM-212-143-N.jpg",
+      "faces/CFD-LM-213-061-N.jpg",
+      "faces/CFD-LM-214-165-N.jpg",
+      "faces/CFD-LM-219-295-N.jpg",
+      "faces/CFD-LM-225-130-N.jpg",
+      "faces/CFD-LM-227-103-N.jpg",
+      "faces/CFD-LM-241-125-N.jpg",
+      "faces/CFD-LM-242-002-N.jpg",
+      "faces/CFD-LM-249-001-N.jpg",
+      "faces/CFD-WM-006-002-N.jpg",
+      "faces/CFD-WM-009-002-N.jpg",
+      "faces/CFD-WM-012-001-N.jpg",
+      "faces/CFD-WM-015-002-N.jpg",
+      "faces/CFD-WM-023-001-N.jpg",
+      "faces/CFD-WM-024-015-N.jpg",
+      "faces/CFD-WM-025-002-N.jpg",
+      "faces/CFD-WM-028-003-N.jpg",
+      "faces/CFD-WM-029-023-N.jpg",
+      "faces/CFD-WM-032-001-N.jpg",
+      "faces/CFD-WM-200-034-N.jpg",
+      "faces/CFD-WM-203-023-N.jpg",
+      "faces/CFD-WM-208-068-N.jpg",
+      "faces/CFD-WM-212-097-N.jpg",
+      "faces/CFD-WM-213-076-N.jpg",
+      "faces/CFD-WM-214-026-N.jpg",
+      "faces/CFD-WM-240-125-N.jpg",
+      "faces/CFD-WM-251-002-N.jpg",
+      "faces/CFD-WM-252-224-N.jpg",
+      "faces/CFD-WM-257-161-N.jpg"
+  ];
+
+ preloadimages.push(faces);
+
+  // EXPERIMENT --------------------------------------------------------------------------------------------------------
+
+  // initial instructions -----------------------------------------------------------------
+  var welcome = {
+    type: "html-keyboard-response",
+    stimulus:
+      "<h1 class ='custom-title'> Welcome </h1>" +
+      "<p class='instructions'> First, thank you for taking part in this study.<p>" +
+      "<p class='instructions'> During this study, you will have to complete three different tasks. We " +
+      "will gather data related to how you complete them, but " +
+      "no personally identifying information will be collected. </p>" +
+      "<p class='instructions'> Because we rely on third party services to gather data, ad-blocking" +
+      " software might interfere with data collection. Therefore, please" +
+      " disable your ad-blocking software during this study." +
+      "<b> If we cannot collect your data, we will not be able to reward you for " +
+      "your participation</b>. </p>" +
+      "<p class='instructions'> If you have any question related to this research, please " +
+      "e-mail marine.rougier@uclouvain.be</p>" +
+      "<p class = 'continue-instructions'>Press <span class='light-keys'><kbd>space</kbd></span> to start the study.</p>",
+    choices: [32]
+  };
+
+
+  // Switching to fullscreen --------------------------------------------------------------
+  var activeFullscreen = {
+    type: 'fullscreen',
+    message: '<p>To take part in this study, your browser needs to be set to fullscreen.</p>',
+    button_label: 'Switch to fullscreen',
+    fullscreen_mode: true
+  }
+
+  // Initial instructions -----------------------------------------------------------------
+  // First slide --------------------------------------------------------------------------
+  var instructions_gene = {
+    type: "html-keyboard-response",
+    stimulus:
+      "<p>You are now about to start the study. In this study, you will engage in <b>3 different tasks</b>.</p>  " +
+      "<p>The first task consists in <b>rating several faces </b>and the two following tasks are about <b>first names categorization.</b></p> " +
+      "<p>After these 3 tasks, we will ask you to fill a <b>short survey.</b></p> " +
+      "<p class = 'continue-instructions'>Press <span class='light-keys'><kbd>space</kbd></span> to start Task 1.</p>",
+    choices: [32]
+  };
+
+
+  /* PREVIEW CIS INSTRUCTIONS */
+  var instructions_trust = {
+    type: "html-keyboard-response",
+    post_trial_gap: 300,
+    choices: [32],
+    stimulus: function () {
+      var html = "";
+      html += "<h1>TASK 1: Trustworthiness ratings</h1>";
+      html += "<p class='justify'>In this part, your task is to rate <b>60 persons' face on trustworthiness</b>. ";
+      html += "Specifically, you have to indicate to what extent each person seems trustworthy from 1 (Not-at-all trustworthy) ";
+      html += "to 9 (Extremely trustworthy). </br></br>";
+      html += "Be careful: on each trial, a face will be displayed during <b>only 1 second</b>. After the face disappears from the screen, you will have to rate it. </br></br>";
+      html += "Note that it is <b>extremely important that you answer as honestly and as spontaneously as possible (remember that your answers are completely anonymous).</b> ";
+      html += "The first answer that comes to mind is the best answer. </br>";
+      html += "<b>Accordingly, we strongly encourage you to report your initial gut feelings when seeing the face.</b> ";
+      html += "<p></br>Press <span class='light-keys'><kbd>space</kbd></span> to continue</p>";
+      return html;
+    },
+  };
+
+
+  var scaleTrustworthiness = ["1</br>Not-at-all trustworthy", "2", "3", "4", "5", "6", "7", "8", "9</br>Extremely trustworthy"];
+
+  var face_name_procedure = {
+    timeline: [
+      {
+        trial_duration: 1000,
+        post_trial_gap: 100,
+        type: 'image-keyboard-response',
+        stimulus: jsPsych.timelineVariable('face'),
+        choices: jsPsych.NO_KEYS,
+      },
+      {
+        type: 'survey-likert',
+        questions: [
+          { prompt: "How trustworthy is this person?", labels: scaleTrustworthiness, required: true },
+        ],
+        on_load: function () {
+          $(".jspsych-content").css("max-width", "100%");
+          $(".jspsych-survey-likert-statement").css("margin", "0px");
+          $(".jspsych-survey-likert-statement").css("padding", "0px");
+          $(".jspsych-survey-likert-opts").css("padding", "0 0 10px");
+          $("#jspsych-survey-likert-next").css("margin-top", "10px");
+          $("#jspsych-survey-likert-form").css("width", "800px");
+          $("li").css("width", "9%");
+          //   $("li:first-of-type").css("width", "110px");
+          //   $("li:last-of-type").css("width", "110px");
+        },
+        on_finish: function (data) {
+          // add & clean data
+          data.rating = JSON.parse(data.responses)["Q0"] + 1;
+          data.face = jsPsych.timelineVariable('face', true);
+
+          // log responses on the console for debug
+          console.log(jsPsych.data.getLastTrialData().json());
+
+          // reset default css
+          $(".jspsych-survey-likert-statement").css("padding", "30px");
+        },
+      },
+    ],
+    timeline_variables: [
+      { face: 'faces/CFD-AM-203-086-N.jpg' },
+      { face: 'faces/CFD-AM-209-048-N.jpg' },
+      { face: 'faces/CFD-AM-211-052-N.jpg' },
+      { face: 'faces/CFD-AM-226-234-N.jpg' },
+      { face: 'faces/CFD-AM-235-241-N.jpg' },
+      { face: 'faces/CFD-AM-236-090-N.jpg' },
+      { face: 'faces/CFD-AM-239-147-N.jpg' },
+      { face: 'faces/CFD-AM-241-287-N.jpg' },
+      { face: 'faces/CFD-AM-245-111-N.jpg' },
+      { face: 'faces/CFD-AM-252-114-N.jpg' },
+      { face: 'faces/CFD-BM-013-002-N.jpg' },
+      { face: 'faces/CFD-BM-016-036-N.jpg' },
+      { face: 'faces/CFD-BM-021-021-N.jpg' },
+      { face: 'faces/CFD-BM-029-024-N.jpg' },
+      { face: 'faces/CFD-BM-032-024-N.jpg' },
+      { face: 'faces/CFD-BM-033-003-N.jpg' },
+      { face: 'faces/CFD-BM-036-003-N.jpg' },
+      { face: 'faces/CFD-BM-037-033-N.jpg' },
+      { face: 'faces/CFD-BM-039-029-N.jpg' },
+      { face: 'faces/CFD-BM-040-002-N.jpg' },
+      { face: 'faces/CFD-BM-045-004-N.jpg' },
+      { face: 'faces/CFD-BM-204-003-N.jpg' },
+      { face: 'faces/CFD-BM-205-001-N.jpg' },
+      { face: 'faces/CFD-BM-210-148-N.jpg' },
+      { face: 'faces/CFD-BM-214-075-N.jpg' },
+      { face: 'faces/CFD-BM-218-132-N.jpg' },
+      { face: 'faces/CFD-BM-239-136-N.jpg' },
+      { face: 'faces/CFD-BM-240-207-N.jpg' },
+      { face: 'faces/CFD-BM-241-235-N.jpg' },
+      { face: 'faces/CFD-BM-243-218-N.jpg' },
+      { face: 'faces/CFD-LM-207-004-N.jpg' },
+      { face: 'faces/CFD-LM-212-143-N.jpg' },
+      { face: 'faces/CFD-LM-213-061-N.jpg' },
+      { face: 'faces/CFD-LM-214-165-N.jpg' },
+      { face: 'faces/CFD-LM-219-295-N.jpg' },
+      { face: 'faces/CFD-LM-225-130-N.jpg' },
+      { face: 'faces/CFD-LM-227-103-N.jpg' },
+      { face: 'faces/CFD-LM-241-125-N.jpg' },
+      { face: 'faces/CFD-LM-242-002-N.jpg' },
+      { face: 'faces/CFD-LM-249-001-N.jpg' },
+      { face: 'faces/CFD-WM-006-002-N.jpg' },
+      { face: 'faces/CFD-WM-009-002-N.jpg' },
+      { face: 'faces/CFD-WM-012-001-N.jpg' },
+      { face: 'faces/CFD-WM-015-002-N.jpg' },
+      { face: 'faces/CFD-WM-023-001-N.jpg' },
+      { face: 'faces/CFD-WM-024-015-N.jpg' },
+      { face: 'faces/CFD-WM-025-002-N.jpg' },
+      { face: 'faces/CFD-WM-028-003-N.jpg' },
+      { face: 'faces/CFD-WM-029-023-N.jpg' },
+      { face: 'faces/CFD-WM-032-001-N.jpg' },
+      { face: 'faces/CFD-WM-200-034-N.jpg' },
+      { face: 'faces/CFD-WM-203-023-N.jpg' },
+      { face: 'faces/CFD-WM-208-068-N.jpg' },
+      { face: 'faces/CFD-WM-212-097-N.jpg' },
+      { face: 'faces/CFD-WM-213-076-N.jpg' },
+      { face: 'faces/CFD-WM-214-026-N.jpg' },
+      { face: 'faces/CFD-WM-240-125-N.jpg' },
+      { face: 'faces/CFD-WM-251-002-N.jpg' },
+      { face: 'faces/CFD-WM-252-224-N.jpg' },
+      { face: 'faces/CFD-WM-257-161-N.jpg' }
+    ],
+    randomize_order: true
+  }
+
+
+  /* DEBRIEF */
+  // var debrief = [];
+  // debrief += "<p class='justify'>Task 1 is now over. </br></br>";
+  // debrief += "<a href='https://www.google.com/' target='_blank'>Click here to continue and go to Task 2</a>";
+
+  // TIMELINE ----------------------------------------------------------------------------------------------------------
+  timeline.push(welcome,
+    activeFullscreen,
+    instructions_gene,
+    instructions_trust,
+    face_name_procedure);
+
+  timeline = _.flattenDeep(timeline); // do not remove this!
+
+  // INITIALISE EXP ----------------------------------------------------------------------------------------------------
+  
+if(is_compatible) {
+  jsPsych.init({
+    timeline: timeline,
+    preload_images: preloadimages,
+    max_load_time: 500 * 1000,
+    exclusions: {
+      min_width: 800,
+      min_height: 600,
+    },
+    on_finish: function (data) {
+      $("#jspsych-content").html("<img src='https://i.gifer.com/4V0b.gif'>");
+
+      /* Initialize Firebase */
+      var config = {
+        apiKey: "AIzaSyBwDr8n-RNCbBOk1lKIxw7AFgslXGcnQzM",
+        databaseURL: "https://marineexpe.firebaseio.com/"
+      };
+
+      firebase.initializeApp(config);
+      var database = firebase.database();
+      var jspsych_id = jsPsych.randomization.randomID(15); // short ID
+
+      /* jsPsych: add data to every trial */
+      jsPsych.data.addProperties({
+        prolificID: prolificID,
+        jspsych_id: jspsych_id,
+        //traitsOrder: traitsOrder,
+        totalTime: jsPsych.totalTime()
+      });
+
+      var subdata = data.filter({ trial_type: 'survey-likert' }).csv();
+      //jsPsych.data.displayData();
+
+      /* Send data to Firebase and redirect to Qualtrics */
+      database.ref("Trust_Ratings/" + jspsych_id + "/").update({ subdata }).then(function () {
+        console.log("data sent!");
+        // $("#jspsych-content").html(debrief);
+        window.location = "https://marinerougier.github.io/VAAST_IAT_Trust_Firebase/index.html?jspsych_id=" + jspsych_id + "?prolificID=" + prolificID;
+      });
+    }
+  });
+  }
+</script>
+
+</html>
